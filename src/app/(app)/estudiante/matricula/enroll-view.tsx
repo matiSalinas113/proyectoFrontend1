@@ -19,7 +19,8 @@ export function EnrollView() {
   const [all, setAll] = useState(false);
   const [query, setQuery] = useState("");
   const [data, setData] = useState<AvailableGroups | null>(null);
-  const [credits, setCredits] = useState(0);
+  const [credits, setCredits] = useState<number | null>(null);
+  const [creditsError, setCreditsError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<{ status: number; message: string } | null>(null);
   const [notice, setNotice] = useState<{ tone: "danger" | "success"; text: string } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
@@ -28,10 +29,13 @@ export function EnrollView() {
     try {
       const [groups, schedule] = await Promise.all([
         api<AvailableGroups>(`/students/me/available-groups${all ? "?all=true" : ""}`),
-        api<StudentSchedule>("/students/me/schedule").catch(() => null),
+        api<StudentSchedule>("/students/me/schedule")
+          .then((schedule) => ({ schedule, error: null }))
+          .catch((error: unknown) => ({ schedule: null, error: error instanceof ApiError ? error.message : "No se pudieron consultar los créditos" })),
       ]);
       setData(groups);
-      setCredits(schedule?.credits ?? 0);
+      setCredits(schedule.schedule?.credits ?? null);
+      setCreditsError(schedule.error);
       setLoadError(null);
     } catch (e) {
       setLoadError(e instanceof ApiError ? { status: e.status, message: e.message } : { status: 0, message: "Error inesperado" });
@@ -71,7 +75,7 @@ export function EnrollView() {
   }
   if (!data) return <p className="text-sm text-muted">Cargando grupos…</p>;
 
-  const pct = Math.min((credits / MAX_CREDITS) * 100, 100);
+  const pct = credits === null ? 0 : Math.min((credits / MAX_CREDITS) * 100, 100);
 
   return (
     <>
@@ -82,11 +86,12 @@ export function EnrollView() {
         </div>
         <div className="min-w-56 flex-1">
           <p className="text-sm text-muted">
-            Créditos matriculados: <strong className="text-ink">{credits}</strong> de {MAX_CREDITS}
+            Créditos matriculados: <strong className="text-ink">{credits ?? "No disponibles"}</strong> de {MAX_CREDITS}
           </p>
-          <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-primary-100" role="progressbar" aria-valuenow={credits} aria-valuemin={0} aria-valuemax={MAX_CREDITS} aria-label="Créditos matriculados">
+          {credits !== null && <div className="mt-2 h-2.5 overflow-hidden rounded-full bg-primary-100" role="progressbar" aria-valuenow={credits} aria-valuemin={0} aria-valuemax={MAX_CREDITS} aria-label="Créditos matriculados">
             <div className={cn("h-full rounded-full", credits >= MAX_CREDITS ? "bg-accent-400" : "bg-primary-600")} style={{ width: `${pct}%` }} />
-          </div>
+          </div>}
+          {creditsError && <Alert>{creditsError}</Alert>}
         </div>
       </Card>
 

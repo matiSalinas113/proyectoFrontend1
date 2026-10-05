@@ -28,7 +28,7 @@ export async function api<T>(path: string, { method = "GET", body }: Options = {
     throw new ApiError(0, "No hay conexion con el servidor");
   }
 
-  if (res.status === 401) {
+  if (res.status === 401 && path !== "/auth/login") {
     // Navegacion completa a proposito: descarta todo el estado del navegador al vencer la sesion
     // eslint-disable-next-line @next/next/no-location-assign-relative-destination
     window.location.href = "/login?expired=1";

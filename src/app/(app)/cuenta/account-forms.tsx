@@ -16,7 +16,7 @@ export function AccountForms({ name, email, roleLabel }: { name: string; email: 
   const router = useRouter();
 
   const [newName, setNewName] = useState(name);
-  const [dirty, setDirty] = useState(false);
+  const dirty = newName.trim() !== name.trim();
   const [nameNotice, setNameNotice] = useState<Notice>(null);
   const [savingName, setSavingName] = useState(false);
 

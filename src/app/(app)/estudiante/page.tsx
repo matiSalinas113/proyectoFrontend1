@@ -10,16 +10,18 @@ export const metadata: Metadata = { title: "Inicio" };
 const fmt = (iso: string) => new Date(iso).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
 
 export default async function StudentHome() {
-  const [me, period, active, notifications] = await Promise.all([
+  const [me, period, notifications] = await Promise.all([
     apiGet<Me>("/users/me"),
     apiGetOrNull<Period>("/periods/current"),
-    apiGetOrNull<Paginated<unknown>>("/enrollments/mine?limit=1"),
     apiGetOrNull<Paginated<Notification> & { unread: number }>("/notifications/mine?limit=1"),
   ]);
+  const active = period
+    ? await apiGetOrNull<Paginated<unknown>>(`/enrollments/mine?limit=1&status=activa&period=${period._id}`)
+    : null;
 
   return (
     <>
-      <PageHeader title={`Hola, ${me.name.split(" ")[1]}`} subtitle="Este es el resumen de tu periodo académico." />
+      <PageHeader title={`Hola, ${me.name.trim().split(/\s+/)[0]}`} subtitle="Este es el resumen de tu periodo académico." />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard

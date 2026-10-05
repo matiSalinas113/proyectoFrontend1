@@ -1,15 +1,23 @@
 import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
-import { EmptyState, PageHeader } from "@/components/ui/feedback";
+import { Alert, EmptyState, PageHeader } from "@/components/ui/feedback";
 import { WeekSchedule } from "@/components/week-schedule";
 import { plural } from "@/lib/format";
-import { apiGetOrNull } from "@/lib/server";
+import { ApiError, apiGet } from "@/lib/server";
 import type { StudentSchedule } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Horario" };
 
 export default async function SchedulePage() {
-  const schedule = await apiGetOrNull<StudentSchedule>("/students/me/schedule");
+  let schedule: StudentSchedule | null = null;
+  try {
+    schedule = await apiGet<StudentSchedule>("/students/me/schedule");
+  } catch (error) {
+    if (!(error instanceof ApiError)) throw error;
+    if (error.status !== 404) {
+      return <><PageHeader title="Mi horario" /><Alert>{error.message}</Alert></>;
+    }
+  }
 
   if (!schedule) {
     return (

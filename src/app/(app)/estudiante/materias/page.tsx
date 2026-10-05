@@ -19,7 +19,7 @@ export default async function MyEnrollmentsPage() {
     if (!byPeriod.has(e.period.code)) byPeriod.set(e.period.code, { status: e.period.status, items: [] });
     byPeriod.get(e.period.code)!.items.push(e);
   }
-  const periods = [...byPeriod.entries()].sort(([a], [b]) => a.localeCompare(b));
+  const periods = [...byPeriod.entries()].sort(([a], [b]) => b.localeCompare(a));
 
   return (
     <>
@@ -55,7 +55,7 @@ export default async function MyEnrollmentsPage() {
                         </div>
                       )}
                       <Badge tone={STATUS_TONE[e.status]}>{STATUS_LABEL[e.status]}</Badge>
-                      {e.status === "activa" && <CancelButton id={e._id} name={e.subject.name} />}
+                      {e.status === "activa" && status === "abierto" && <CancelButton id={e._id} name={e.subject.name} />}
                     </Card>
                   </li>
                 ))}

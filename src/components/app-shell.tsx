@@ -80,7 +80,7 @@ export function AppShell({ name, role, items, common, children }: Props) {
         aria-current={active ? "page" : undefined}
         className={cn(
           "flex min-h-11 items-center gap-3 rounded-xl px-3.5 text-sm font-semibold transition-colors",
-          active ? "bg-primary-600 text-white shadow-sm" : "text-white hover:bg-primary-50 hover:text-ink",
+          active ? "bg-primary-600 text-white shadow-sm" : "text-muted hover:bg-primary-50 hover:text-ink",
         )}
       >
         <Icon className="size-[18px]" aria-hidden />
@@ -103,13 +103,13 @@ export function AppShell({ name, role, items, common, children }: Props) {
         {items.map((item, i) => (
           <div key={item.href}>
             {item.section && item.section !== items[i - 1]?.section && (
-              <p className="mt-5 mb-1.5 px-3.5 text-xs font-bold tracking-wider text-white uppercase">{item.section}</p>
+              <p className="mt-5 mb-1.5 px-3.5 text-xs font-bold tracking-wider text-muted uppercase">{item.section}</p>
             )}
             {renderLink(item)}
           </div>
         ))}
       </div>
-      <p className="mt-6 mb-2 px-3.5 text-xs font-bold tracking-wider text-white uppercase">Cuenta</p>
+      <p className="mt-6 mb-2 px-3.5 text-xs font-bold tracking-wider text-muted uppercase">Cuenta</p>
       <div className="space-y-1">{common.map(renderLink)}</div>
 
       <div className="mt-auto flex items-center gap-3 rounded-xl border border-line bg-canvas p-3">

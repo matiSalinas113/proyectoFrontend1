@@ -16,7 +16,7 @@ const message = (e: unknown, fallback: string) => (e instanceof ApiError ? e.mes
 
 // Nota valida: 0 a 5, maximo 2 decimales (acepta coma o punto)
 const parse = (text: string): number | null => {
-  const t = text.trim();
+  const t = text.trim().replace(",", ".");
   if (!/^\d(\.\d{1,2})?$/.test(t)) return null;
   const n = Number(t);
   return n >= 0 && n <= 5 ? n : null;
@@ -54,7 +54,7 @@ export function GradeSheetPanel({ groupId, readOnly }: { groupId: string; readOn
       for (const ev of sheet.evaluations) {
         const k = key(row.enrollment, ev.id);
         const text = drafts[k];
-        if (text === undefined || text.trim() === "") continue;
+        if (text === undefined || (text.trim() === "" && row.grades[ev.id] == null)) continue;
         const value = parse(text);
         if (value !== null && value === row.grades[ev.id]) continue;
         list.push({ enrollment: row.enrollment, evaluation: ev.id, text, value, k });
@@ -163,7 +163,7 @@ export function GradeSheetPanel({ groupId, readOnly }: { groupId: string; readOn
                       const k = key(row.enrollment, ev.id);
                       const saved = row.grades[ev.id];
                       const draft = drafts[k];
-                      const bad = draft !== undefined && draft.trim() !== "" && parse(draft) === null;
+                      const bad = draft !== undefined && parse(draft) === null && (draft.trim() !== "" || saved != null);
                       return (
                         <td key={ev.id} className="border-b border-line/60 px-2 py-2 text-center">
                           {editable ? (
@@ -215,7 +215,7 @@ export function GradeSheetPanel({ groupId, readOnly }: { groupId: string; readOn
             <Button onClick={save} loading={saving} disabled={!unsaved || invalid.length > 0}>
               <Save className="size-4" aria-hidden /> Guardar {unsaved ? `${changes.length} ${changes.length === 1 ? "cambio" : "cambios"}` : "cambios"}
             </Button>
-            {invalid.length > 0 && <span className="text-sm font-medium text-danger-600">Hay {invalid.length} notas inválidas (0 a 5, máx. 2 decimales).</span>}
+            {invalid.length > 0 && <span className="text-sm font-medium text-danger-600">Hay {invalid.length} notas inválidas. Ingresa un valor de 0 a 5 (máx. 2 decimales); una nota guardada no puede quedar vacía.</span>}
           </div>
 
           {confirming ? (
